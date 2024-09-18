@@ -8,13 +8,13 @@ GO
 
 CREATE TABLE dbo.Empleado
 (
-    Id INT IDENTITY (1,1) PRIMARY KEY, 
-    IdPuesto INT FOREIGN KEY REFERENCES Puesto(Id), 
-    ValorDocumentoIdentidad VARCHAR(128), 
-    Nombre VARCHAR(128), 
-    FechaContratacion DATE, 
-    SaldoVacaciones INT, 
-    EsActivo BIT
+    Id INT IDENTITY(1,1) PRIMARY KEY, 
+    IdPuesto INT NOT NULL FOREIGN KEY REFERENCES Puesto(Id), 
+    ValorDocumentoIdentidad VARCHAR(128) NOT NULL,  
+    Nombre VARCHAR(128) NOT NULL, 
+    FechaContratacion DATE NOT NULL, 
+    SaldoVacaciones INT NOT NULL DEFAULT 0, 
+    EsActivo BIT NOT NULL DEFAULT 1 
 );
 GO
 
@@ -28,15 +28,15 @@ GO
 
 CREATE TABLE dbo.Movimiento
 (
-    Id INT PRIMARY KEY, 
-    IdEmpleado INT FOREIGN KEY REFERENCES Empleado(Id), 
-    IdTipoMovimiento INT FOREIGN KEY REFERENCES TipoMovimiento(Id), 
-    Fecha DATETIME, 
-    Monto INT, 
-    NuevoSaldo INT, 
-    IdPostByUser INT FOREIGN KEY REFERENCES Usuario(Id), 
-    PostInIP VARCHAR(128), 
-    PostTime DATETIME
+    Id INT IDENTITY(1,1) PRIMARY KEY, 
+    IdEmpleado INT NOT NULL FOREIGN KEY REFERENCES Empleado(Id), 
+    IdTipoMovimiento INT NOT NULL FOREIGN KEY REFERENCES TipoMovimiento(Id), 
+    Fecha DATETIME NOT NULL, 
+    Monto INT NOT NULL, 
+    NuevoSaldo INT NOT NULL, 
+    IdPostByUser INT NOT NULL FOREIGN KEY REFERENCES Usuario(Id), 
+    PostInIP VARCHAR(64) NOT NULL, 
+    PostTime DATETIME NOT NULL
 );
 GO
 
@@ -44,6 +44,21 @@ CREATE TABLE dbo.Usuario
 (
     Id INT PRIMARY KEY, 
     Username VARCHAR(128), 
-    Contrasena VARCHAR(128)
+    Pass VARCHAR(128)
+);
+GO
+
+CREATE TABLE dbo.TipoEvento
+(
+    Id INT PRIMARY KEY, 
+    Nombre VARCHAR(128)
+);
+GO
+
+CREATE TABLE dbo.Error
+(
+    Id INT IDENTITY(1,1) PRIMARY KEY, 
+    Codigo INT NOT NULL,
+    Descripcion VARCHAR(128) NOT NULL,
 );
 GO
