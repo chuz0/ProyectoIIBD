@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Planilla</title>
+    <style>
+        
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .scrollable-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .filaSeleccion{
+            background-color: #ffffff;
+        }
+        .boton {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 6px;
+            margin-bottom: 16px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-gap: 10px;
+        }
+        .container {
+            padding: 20px;
+            text-align: center;
+            background-color: #f2f2f2;
+            border-radius: 4px;
+        }
+        .boton:hover {
+            background-color: #0f140f;
+            color: white;
+            cursor: pointer;
+        }
+        .innerTitle {
+            color: #ffffff;
+            font-size: 24px;
+            justify-content: center;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .close {
+            cursor: pointer;
+            color: red;
+            float: right;
+            font-size: 24px;
+        }
+        .error_div {
+            display: none;
+            position: fixed;
+            background-color: #f44336;
+            z-index: 2;
+            color: white;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+        .error-cont {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+
+        }
+
+    </style>
+</head>
+<body>
+    <header class="grid-container">
+        <div class="container searchForm">
+            <h2>Gestor de Planilla</h2>
+        </div>
+    </header>
+    <h2>Lista de Empleados</h2>
+    <div class="scrollable-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>IdPuesto</th>
+                    <th>ValorDocumentoIdentidad</th>
+                    <th>Nombre</th>
+                    <th>FechaContratacion</th>
+                    <th>SaldoVacaciones</th>
+                    <th>EsActivo</th>
+                </tr>
+            </thead>
+            <tbody id="empleados">
+                
+            </tbody>
+        </table>
+    </div>
+
+    <button id="insertar" class="boton">Insertar Empleado</button>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Insertar Empleado</h2>
+            <form id="formulario">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required>
+                <label for="salario">Salario:</label>
+                <input type="number" id="salario" name="salario" required>
+                <button type="submit" class="boton">Insertar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="error_div" id="error_divId">
+        <h2 class="error-cont">Error</h2>
+        <p id="error" class="error-cont"></p>
+        <button class="boton error-cont" onclick="document.querySelector('.error_div').style.display = 'none';">Cerrar</button>
+    </div>
+
+    <script>
+        const url = 'http://127.0.0.1:5000/listar_empleados';
+
+        fetch(url)
+            .then(response => {
+            if (!response.ok) {
+                throw new Error('Error al obtener el archivo JSON');
+            }
+
+            return response.json();
+        })
+            .then(data => {
+                cargarEmpleados(data.Empleados);
+        })
+            .catch(error => {
+                console.error('Error:', error);
+        });
+
+        // Función para cargar empleados en la tabla
+    function cargarEmpleados(empleados) {
+        const empleadosLista = document.getElementById('empleados');
+        empleadosLista.innerHTML = ''; 
+    
+        empleados.forEach(empleado => {
+            const fila = document.createElement('tr');
+
+            const idCelda = document.createElement('td');
+            idCelda.textContent = empleado.Id;
+            fila.appendChild(idCelda);
+            
+            const idpuestoCelda = document.createElement('td');
+            idpuestoCelda.textContent = empleado.IdPuesto;
+            fila.appendChild(idpuestoCelda);
+
+            const valorDocumentoIdentidadCelda = document.createElement('td');
+            valorDocumentoIdentidadCelda.textContent = empleado.ValorDocumentoIdentidad;
+            fila.appendChild(valorDocumentoIdentidadCelda);
+
+            const nombreCelda = document.createElement('td');
+            nombreCelda.textContent = empleado.Nombre;
+            fila.appendChild(nombreCelda);
+
+            const fechaContratacionCelda = document.createElement('td');
+            fechaContratacionCelda.textContent = empleado.FechaContratacion;
+            fila.appendChild(fechaContratacionCelda);
+
+            const saldoVacacionesCelda = document.createElement('td');
+            saldoVacacionesCelda.textContent = empleado.SaldoVacaciones;
+            fila.appendChild(saldoVacacionesCelda);
+
+            const esActivoCelda = document.createElement('td');
+            esActivoCelda.textContent = empleado.EsActivo;
+            fila.appendChild(esActivoCelda);
+
+            empleadosLista.appendChild(fila);
+        });
+    }
+
+    // Mostrar el modal al hacer clic en el botón "Insertar Empleado"
+    const modal = document.getElementById('modal');
+        const botonInsertar = document.getElementById('insertar');
+        const closeModal = document.querySelector('.close');
+
+        botonInsertar.onclick = function() {
+            modal.style.display = 'flex'; // Mostrar modal
+        }
+
+        // Cerrar el modal cuando se hace clic en la "X"
+        closeModal.onclick = function() {
+            modal.style.display = 'none'; // Ocultar modal
+        }
+
+        // Cerrar el modal cuando se hace clic fuera de él
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = 'none'; // Ocultar modal
+            }
+        }
+
+    const urlInsertar = 'http:////127.0.0.1:5000/insertar_empleado';
+    
+    //funcion para insertar un empleado
+    const formulario = document.getElementById('formulario');
+
+    formulario.onsubmit = function(event) {
+        event.preventDefault();
+
+        const nombre = document.getElementById('nombre').value;
+        const salario = document.getElementById('salario').value;
+
+        fetch(urlInsertar, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                nombre: nombre,
+                salario: salario
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    document.querySelector('.error_div').style.display = 'block';
+                    document.getElementById('error').textContent = 'Error al insertar el empleado';
+                    throw new Error('Error al insertar el empleado');
+                }
+
+                return response.json();
+            })
+            .then(data => {
+                if (data.OutResultCode==50001){
+                    document.querySelector('.error_div').style.display = 'block';
+                    document.getElementById('error').textContent = 'Empleado ya existe';
+                }
+                else{
+                    document.querySelector('.error_div').style.display = 'none';
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
+    </script>
+</body>
+</html>

@@ -65,7 +65,7 @@ BEGIN
         6,
         (SELECT Id FROM dbo.Usuario WHERE Username = @Username),
         GETDATE(),
-        'Insercion no exitosa',
+        'Insercion exitosa',
         @PostInIP,
         @PostTime
     );
