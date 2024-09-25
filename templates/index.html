@@ -17,7 +17,6 @@
             width: 100%;
             border-collapse: collapse;
         }
-        
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
@@ -36,10 +35,36 @@
             max-height: 400px;
             overflow-y: auto;
         }
+        .input {
+            width: 75%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            grid-column: 1;
+        }
         .filaSeleccion{
             background-color: #ffffff;
         }
         .boton {
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-top: 6px;
+            margin-bottom: 16px;
+        }
+        .enlace {
+            text-decoration: none;
+            color: black;
+        }
+        .verBoton {
+            padding: 5px;
+            margin: 2px;
+        }
+        #crear {
             padding: 12px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -63,53 +88,52 @@
             color: white;
             cursor: pointer;
         }
+        .opcionesDiv {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .opcionesDiv button {
+        margin: 10px;
+        padding: 10px 20px;
+        font-size: 16px;
+        }
+
+        .modificarOpcion {
+            background-color: #4CAF50; 
+            color: white;
+            border: none;
+        }
+
+        .eliminarOpcion {
+            background-color: #f44336; 
+            color: white;
+            border: none;
+        }
         .innerTitle {
             color: #ffffff;
             font-size: 24px;
             justify-content: center;
         }
-        .modal {
-            display: none;
+        #confirmacion {
             position: fixed;
-            z-index: 1;
-            left: 0;
             top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            text-align: center;
-        }
-        .close {
-            cursor: pointer;
-            color: red;
-            float: right;
-            font-size: 24px;
-        }
-        .error_div {
+            backdrop-filter: blur(5px);
             display: none;
-            position: fixed;
-            background-color: #f44336;
-            z-index: 2;
-            color: white;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
             justify-content: center;
             align-items: center;
-            width: 100%;
-        }
-        .error-cont {
-            text-align: center;
-            justify-content: center;
-            align-items: center;
-
         }
 
     </style>
@@ -118,20 +142,33 @@
     <header class="grid-container">
         <div class="container searchForm">
             <h2>Gestor de Planilla</h2>
+            <form>
+                <label for="search">Filtar:</label>
+                <input type="text" id="search" name="search" required, class="input", placeholder="Ingrese un número o un nombre"><br><br>
+                <input type="submit" value="Buscar", class="boton">
+            </form>
         </div>
-    </header>
+        <div class="container crearForm">
+            <h2 id="bienvenida">Bienvenido {{username}}</h2>
+            <h2>Crear Empleado</h2>
+            <a href="/insertaremp", class="boton enlace">Crear Empleado</a>
+        </div>
+        <div class="container movimientoForm">
+            <a href="/logout" class="boton enlace">Logout</a>
+        </div>
+        </header>
     <h2>Lista de Empleados</h2>
     <div class="scrollable-table">
         <table>
             <thead>
                 <tr>
-                    <th>Id</th>
                     <th>IdPuesto</th>
                     <th>ValorDocumentoIdentidad</th>
                     <th>Nombre</th>
                     <th>FechaContratacion</th>
                     <th>SaldoVacaciones</th>
                     <th>EsActivo</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="empleados">
@@ -140,19 +177,35 @@
         </table>
     </div>
 
-    <button id="insertar" class="boton">Insertar Empleado</button>
-
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Insertar Empleado</h2>
-            <form id="formulario">
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required>
-                <label for="salario">Salario:</label>
-                <input type="number" id="salario" name="salario" required>
-                <button type="submit" class="boton">Insertar</button>
-            </form>
+    <div class="opcionesDiv">
+        <h2 class="innerTitle">Opciones Empleado</h2>
+        <div class="scrollable-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Documento</th>
+                        <th>Fecha de Contratación</th>
+                        <th>Puesto</th>
+                        <th>Activo</th>
+                        <th>Saldo Vacaciones</th>
+                    </tr>
+                </thead>
+                <tbody id="seleccion">
+                    
+                </tbody>
+            </table>
+        </div>
+        <br>
+        <button class="boton modificarOpcion", id="modificar">Modificar</button>
+        <button class="boton eliminarOpcion", id="eliminar", onclick="document.getElementById('confirmacion').style.display='flex';">Eliminar</button>
+        <button class="boton", id="insMovimiento">Insertar Movimiento</button>
+        <button id="movimientos", class="boton">Ver Movimientos</button>
+        <button class="boton" onclick="document.querySelector('.opcionesDiv').style.display = 'none';">Cerrar</button>
+        <div id="confirmacion">
+            <h1>¿Seguro que desea eliminar al empleado?</h1>
+            <button class="boton", id="confirmar">Confirmar</button>
+            <button class="boton", id="cancelar" onclick="document.getElementById('confirmacion').style.display = 'none';" >Cancelar</button>
         </div>
     </div>
 
@@ -187,10 +240,6 @@
     
         empleados.forEach(empleado => {
             const fila = document.createElement('tr');
-
-            const idCelda = document.createElement('td');
-            idCelda.textContent = empleado.Id;
-            fila.appendChild(idCelda);
             
             const idpuestoCelda = document.createElement('td');
             idpuestoCelda.textContent = empleado.IdPuesto;
@@ -215,8 +264,44 @@
             const esActivoCelda = document.createElement('td');
             esActivoCelda.textContent = empleado.EsActivo;
             fila.appendChild(esActivoCelda);
+            const accionesCelda = document.createElement('td');
+            const verBoton = document.createElement('button');
+            const divOpciones = document.querySelector('.opcionesDiv');
+            verBoton.textContent = 'Ver';
+            verBoton.classList.add('boton');
+            verBoton.classList.add('verBoton');
+            verBoton.addEventListener('click', function() {
+                divOpciones.style.display = 'grid';
+                const seleccion = document.getElementById('seleccion');
+                seleccion.innerHTML = '';
+                const filaSeleccion = document.createElement('tr');
+                filaSeleccion.classList.add('filaSeleccion');
+                const nombreSeleccion = document.createElement('td');
+                nombreSeleccion.textContent = empleado.nombre;
+                filaSeleccion.appendChild(nombreSeleccion);
+                const documentoSeleccion = document.createElement('td');
+                documentoSeleccion.textContent = empleado.valorDocumento;
+                filaSeleccion.appendChild(documentoSeleccion);
+                const fechaSeleccion = document.createElement('td');
+                fechaSeleccion.textContent = new Date(empleado.fechaContratacion).toLocaleDateString();
+                filaSeleccion.appendChild(fechaSeleccion);
+                const puestoSeleccion = document.createElement('td');
+                puestoSeleccion.textContent = empleado.puesto;
+                filaSeleccion.appendChild(puestoSeleccion);
+                const activoSeleccion = document.createElement('td');
+                activoSeleccion.textContent = empleado.esActivo ? 'Sí' : 'No';
+                filaSeleccion.appendChild(activoSeleccion);
+                const saldoSeleccion = document.createElement('td');
+                saldoSeleccion.textContent = empleado.saldoVacaciones;
+                filaSeleccion.appendChild(saldoSeleccion);
+                seleccion.appendChild(filaSeleccion);
+            });
 
-            empleadosLista.appendChild(fila);
+                accionesCelda.appendChild(verBoton);
+
+                fila.appendChild(accionesCelda);
+
+                empleadosLista.appendChild(fila);
         });
     }
 
