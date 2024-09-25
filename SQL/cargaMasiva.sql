@@ -1,72 +1,84 @@
 ALTER PROCEDURE CargarDatosDesdeXML
-    @DatosXML XML
+    @xmlData XML
 AS
 BEGIN
+    BEGIN TRANSACTION;
     BEGIN TRY
-        BEGIN TRANSACTION; 
+        -- Insertar en la tabla Puesto
+        INSERT INTO dbo.Puesto (Nombre, SalarioxHora)
+        SELECT 
+            Puesto.value('@Nombre', 'VARCHAR(128)'),
+            Puesto.value('@SalarioxHora', 'MONEY')
+        FROM @xmlData.nodes('/Datos/Puestos/Puesto') AS T(Puesto);
 
-        INSERT INTO puesto (nombre, salarioHora)
-        SELECT
-            puesto.value('@Nombre', 'varchar(64)') AS nombre,
-            puesto.value('@SalarioxHora', 'money') AS salarioHora
-        FROM @DatosXML.nodes('/Datos/Puestos/Puesto') AS Tbl(puesto);
-        
-        INSERT INTO tipoEvento (id, nombre)
-        SELECT
-            tipoEvento.value('@Id', 'int') AS id,
-            tipoEvento.value('@Nombre', 'varchar(64)') AS nombre
-        FROM @DatosXML.nodes('/Datos/TiposEvento/TipoEvento') AS Tbl(tipoEvento);
+        -- Insertar en la tabla TipoEvento
+        INSERT INTO dbo.TipoEvento (Id, Nombre)
+        SELECT 
+            TipoEvento.value('@Id', 'INT'),
+            TipoEvento.value('@Nombre', 'VARCHAR(128)')
+        FROM @xmlData.nodes('/Datos/TiposEvento/TipoEvento') AS T(TipoEvento);
 
-        INSERT INTO tipoMovimiento (id, nombre, tipoAccion)
-        SELECT
-            tipoMovimiento.value('@Id', 'int') AS id,
-            tipoMovimiento.value('@Nombre', 'varchar(64)') AS nombre,
-            tipoMovimiento.value('@TipoAccion', 'char(1)') AS tipoAccion
-        FROM @DatosXML.nodes('/Datos/TiposMovimientos/TipoMovimiento') AS Tbl(tipoMovimiento);
+        -- Insertar en la tabla TipoMovimiento
+        INSERT INTO dbo.TipoMovimiento (Id, Nombre, TipoAccion)
+        SELECT 
+            TipoMovimiento.value('@Id', 'INT'),
+            TipoMovimiento.value('@Nombre', 'VARCHAR(128)'),
+            TipoMovimiento.value('@TipoAccion', 'VARCHAR(128)')
+        FROM @xmlData.nodes('/Datos/TiposMovimientos/TipoMovimiento') AS T(TipoMovimiento);
 
-        INSERT INTO error (codigo, descripcion)
-        SELECT
-            error.value('@Codigo', 'int') AS codigo,
-            error.value('@Descripcion', 'varchar(64)') AS descripcion
-        FROM @DatosXML.nodes('/Datos/Error/error') AS Tbl(error);
+        -- Insertar en la tabla Usuario
+        INSERT INTO dbo.Usuario (Id, Username, Pass)
+        SELECT 
+            Usuario.value('@Id', 'INT'),
+            Usuario.value('@Nombre', 'VARCHAR(128)'),
+            Usuario.value('@Pass', 'VARCHAR(128)')
+        FROM @xmlData.nodes('/Datos/Usuarios/usuario') AS T(Usuario);
 
-        INSERT INTO empleado (idPuesto, valorDocumento, nombre, fechaContratacion, saldoVacaciones, esActivo)
-        SELECT
-            (SELECT id FROM puesto WHERE nombre = empleado.value('@Puesto', 'varchar(64)')) AS idPuesto,
-            empleado.value('@ValorDocumentoIdentidad', 'nvarchar(20)') AS ValorDocumentoIdentidad,
-            empleado.value('@Nombre', 'varchar(64)') AS Nombre,
-            empleado.value('@FechaContratacion', 'date') AS FechaContratacion,
-            0 AS SaldoVacaciones,
-            1 AS EsActivo
-        FROM @DatosXML.nodes('/Datos/Empleados/empleado') AS Tbl(Empleado);
+        -- Insertar en la tabla Empleado
+        INSERT INTO dbo.Empleado (IdPuesto, ValorDocumentoIdentidad, Nombre, FechaContratacion)
+        SELECT 
+            (SELECT Id FROM dbo.Puesto WHERE Nombre = Empleado.value('@Puesto', 'VARCHAR(128)')),
+            Empleado.value('@ValorDocumentoIdentidad', 'VARCHAR(128)'),
+            Empleado.value('@Nombre', 'VARCHAR(128)'),
+            Empleado.value('@FechaContratacion', 'DATE')
+        FROM @xmlData.nodes('/Datos/Empleados/empleado') AS T(Empleado);
 
-        INSERT INTO usuario (id, username, password)
-        SELECT
-            usuario.value('@Id', 'int') AS id,
-            usuario.value('@Nombre', 'varchar(64)') AS username,
-            usuario.value('@Pass', 'varchar(64)') AS password
-        FROM @DatosXML.nodes('/Datos/Usuarios/usuario') AS Tbl(usuario);
+        -- Insertar en la tabla Movimiento
+        INSERT INTO dbo.Movimiento (IdEmpleado, IdTipoMovimiento, Fecha, Monto, NuevoSaldo, IdPostByUser, PostInIP, PostTime)
+        SELECT 
+            (SELECT Id FROM dbo.Empleado WHERE ValorDocumentoIdentidad = Movimiento.value('@ValorDocId', 'VARCHAR(128)')),
+            (SELECT Id FROM dbo.TipoMovimiento WHERE Nombre = Movimiento.value('@IdTipoMovimiento', 'VARCHAR(128)')),
+            Movimiento.value('@Fecha', 'DATETIME'),
+            Movimiento.value('@Monto', 'INT'),
+            Movimiento.value('@Monto', 'INT'),  -- Ajustar el nuevo saldo correctamente según la lógica
+            (SELECT Id FROM dbo.Usuario WHERE Username = Movimiento.value('@PostByUser', 'VARCHAR(128)')),
+            Movimiento.value('@PostInIP', 'VARCHAR(64)'),
+            Movimiento.value('@PostTime', 'DATETIME')
+        FROM @xmlData.nodes('/Datos/Movimientos/movimiento') AS T(Movimiento);
 
-        INSERT INTO movimiento (idEmpleado, idTipoMovimiento, fecha, monto, nuevoSaldo, idPostByUser, postInIp, postTime)
-        SELECT
-            (SELECT id FROM empleado WHERE valorDocumento = movimiento.value('@ValorDocId', 'int')) AS idEmpleado,
-            (SELECT id FROM tipoMovimiento WHERE nombre = movimiento.value('@IdTipoMovimiento', 'varchar(64)')) AS idTipoMovimiento,
-            movimiento.value('@Fecha', 'datetime') AS fecha,
-            movimiento.value('@Monto', 'int') AS monto,
-            0 AS nuevoSaldo,
-            (SELECT id FROM usuario WHERE username = movimiento.value('@PostByUser', 'varchar(64)')) AS idPostByUser,
-            movimiento.value('@PostInIP', 'varchar(64)') AS postInIp,
-            movimiento.value('@PostTime', 'datetime') AS postTime
-        FROM @DatosXML.nodes('/Datos/Movimientos/movimiento') AS Tbl(movimiento);
+        -- Insertar en la tabla Error
+        INSERT INTO dbo.Error (Codigo, Descripcion)
+        SELECT 
+            Error.value('@Codigo', 'INT'),
+            Error.value('@Descripcion', 'VARCHAR(128)')
+        FROM @xmlData.nodes('/Datos/Error/error') AS T(Error);
 
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
-        SELECT 
-            ERROR_NUMBER() AS ErrorNumber,
-            ERROR_MESSAGE() AS ErrorMessage,
-            ERROR_LINE() AS ErrorLine;
-
         ROLLBACK TRANSACTION;
+        -- Manejar el error
+        INSERT INTO dbo.DBErrors (UserName, Number, State, Severity, Line, [Procedure], Message, DateTime)
+        VALUES (
+            SYSTEM_USER,
+            ERROR_NUMBER(),
+            ERROR_STATE(),
+            ERROR_SEVERITY(),
+            ERROR_LINE(),
+            ERROR_PROCEDURE(),
+            ERROR_MESSAGE(),
+            GETDATE()
+        );
     END CATCH;
-END
+END;
+GO
