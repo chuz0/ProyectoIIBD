@@ -9,8 +9,8 @@ CORS(app)
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=DESKTOP-HUTR52P;'
-        #'SERVER=ERICKPC;'
+        #'SERVER=DESKTOP-HUTR52P;'
+        'SERVER=ERICKPC;'
         'DATABASE=proyecto2;'
         'UID=hola;' 
         'PWD=12345678'
@@ -93,7 +93,7 @@ def listar_empleados():
         cursor.nextset() #Obtener los resultados, no el código de resultado
         for row in cursor.fetchall():
             empleado = {
-                'IdPuesto': row.Puesto,
+                'IdPuesto': row.IdPuesto,
                 'ValorDocumentoIdentidad': row.ValorDocumentoIdentidad,
                 'Nombre': row.Nombre,
                 'FechaContratacion': row.FechaContratacion,

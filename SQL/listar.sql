@@ -1,4 +1,4 @@
-CREATE PROCEDURE [dbo].[ListarEmpleado]
+ALTER PROCEDURE [dbo].[ListarEmpleado]
 	@OutResulTCode INT OUTPUT
 AS
 BEGIN
@@ -16,7 +16,8 @@ BEGIN
         , E.[FechaContratacion]
         , E.[SaldoVacaciones]
         , E.[EsActivo]
-	FROM dbo.Empleado E 
+	FROM dbo.Empleado E
+	INNER JOIN dbo.Puesto P ON E.IdPuesto = P.Id 
 	ORDER BY E.Nombre;
 
 	END TRY
