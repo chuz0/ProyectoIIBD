@@ -10,8 +10,8 @@ CORS(app)
 def get_db_connection():
     connection = pyodbc.connect(
         'DRIVER={ODBC Driver 17 for SQL Server};'
-        'SERVER=DESKTOP-HUTR52P;'
-        #'SERVER=ERICKPC;'
+        #'SERVER=DESKTOP-HUTR52P;'
+        'SERVER=ERICKPC;'
         'DATABASE=proyecto2;'
         'UID=hola;' 
         'PWD=12345678'
@@ -123,43 +123,42 @@ def listar_empleados():
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    empleados = []
-    out_result_code = 0
-
     try:
         cursor.execute("""
-            DECLARE @OutResulTCode INT;
-            EXEC [dbo].[ListarEmpleado] @OutResulTCode = @OutResulTCode OUTPUT;
-            SELECT @OutResulTCode;
+            DECLARE @OutResultCode INT;
+
+            EXEC [dbo].[ListarEmpleado]
+            @OutResultCode = @OutResultCode OUTPUT;
+
+            SELECT @OutResultCode AS OutResultCode;
         """)
 
-        # Obtener el valor del código de resultado
+        empleados = cursor.fetchall()
+
+        cursor.nextset() 
         out_result_code = cursor.fetchone()[0]
 
-        # Obtener la lista de empleados
-        cursor.nextset() #Obtener los resultados, no el código de resultado
-        for row in cursor.fetchall():
-            empleado = {
-                'IdPuesto': row.IdPuesto,
-                'ValorDocumentoIdentidad': row.ValorDocumentoIdentidad,
-                'Nombre': row.Nombre,
-                'FechaContratacion': row.FechaContratacion,
-                'SaldoVacaciones': row.SaldoVacaciones,
-                'EsActivo': row.EsActivo,
-
-            }
-            empleados.append(empleado)
+        empleados_lista = []
+        for empleado in empleados:
+            empleados_lista.append({
+                'Id': empleado[0],
+                'ValorDocumentoIdentidad': empleado[1],
+                'Nombre': empleado[2],
+                'Puesto': empleado[3],
+                'FechaContratacion': empleado[4].strftime('%d-%m-%Y'),
+                'SaldoVacaciones': empleado[5],
+                'EsActivo': empleado[6],
+            })
 
         conn.commit()
+
+        return jsonify({'OutResultCode': out_result_code, 'Empleados': empleados_lista})
+
     except Exception as e:
-        conn.rollback()
         return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
         conn.close()
-
-    return jsonify({'OutResultCode': out_result_code, 'Empleados': empleados})
-
 
 
 if __name__ == '__main__':

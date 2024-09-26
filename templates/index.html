@@ -162,12 +162,12 @@
         <table>
             <thead>
                 <tr>
-                    <th>IdPuesto</th>
-                    <th>ValorDocumentoIdentidad</th>
+                    <th>Documento Identidad</th>
                     <th>Nombre</th>
-                    <th>FechaContratacion</th>
-                    <th>SaldoVacaciones</th>
-                    <th>EsActivo</th>
+                    <th>Puesto</th>
+                    <th>Fecha Contratación</th>
+                    <th>Saldo Vacaciones</th>
+                    <th>Activo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -240,10 +240,6 @@
     
         empleados.forEach(empleado => {
             const fila = document.createElement('tr');
-            
-            const idpuestoCelda = document.createElement('td');
-            idpuestoCelda.textContent = empleado.IdPuesto;
-            fila.appendChild(idpuestoCelda);
 
             const valorDocumentoIdentidadCelda = document.createElement('td');
             valorDocumentoIdentidadCelda.textContent = empleado.ValorDocumentoIdentidad;
@@ -252,6 +248,10 @@
             const nombreCelda = document.createElement('td');
             nombreCelda.textContent = empleado.Nombre;
             fila.appendChild(nombreCelda);
+
+            const idpuestoCelda = document.createElement('td');
+            idpuestoCelda.textContent = empleado.Puesto;
+            fila.appendChild(idpuestoCelda);
 
             const fechaContratacionCelda = document.createElement('td');
             fechaContratacionCelda.textContent = empleado.FechaContratacion;
