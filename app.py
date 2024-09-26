@@ -19,7 +19,33 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT Username, Password
+            FROM Usuario
+            WHERE Username = ? AND Password = ?
+        """, (username, password))
+
+        user = cursor.fetchone()
+        if user:
+            return jsonify({'message': 'Login successful!'})
+        else:
+            return jsonify({'message': 'Login failed!'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 # Ruta para ejecutar el procedimiento almacenado
 @app.route('/insertar_empleado', methods=['POST'])
@@ -112,6 +138,7 @@ def listar_empleados():
         conn.close()
 
     return jsonify({'OutResultCode': out_result_code, 'Empleados': empleados})
+
 
 
 if __name__ == '__main__':
