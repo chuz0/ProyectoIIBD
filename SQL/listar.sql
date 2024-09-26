@@ -7,18 +7,16 @@ BEGIN
 	
 	SET @OutResulTCode=0;
 
-	SELECT @OutResulTCode AS OutResulTCode;  -- Este codigo se agrega solo si hay problemas para obtener este  valor como parametros
-
-	SELECT E.[Id]   -- En interfaces a usuario final no se muestra, ni en apis
-		, E.[IdPuesto]
-        , E.[ValorDocumentoIdentidad]
-        , E.[Nombre]
-        , E.[FechaContratacion]
-        , E.[SaldoVacaciones]
-        , E.[EsActivo]
-	FROM dbo.Empleado E
-	INNER JOIN dbo.Puesto P ON E.IdPuesto = P.Id 
-	ORDER BY E.Nombre;
+SELECT E.[Id]  
+       , E.[ValorDocumentoIdentidad]
+       , E.[Nombre]
+	   , P.[Nombre] AS Puesto
+       , E.[FechaContratacion]
+       , E.[SaldoVacaciones]
+       , E.[EsActivo] 
+FROM dbo.Empleado E
+INNER JOIN dbo.Puesto P ON E.IdPuesto = P.Id
+ORDER BY E.Nombre;
 
 	END TRY
 	BEGIN CATCH
