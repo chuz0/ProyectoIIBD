@@ -10,3 +10,12 @@ Content-Type: application/json
 ### Consultar empleados
 
 GET http://localhost:5000/listar_empleados
+
+### Login
+GET  http://localhost:5000/login
+Content-Type: application/json
+
+{
+  "usuario": "Erick", 
+  "contrasena": "1234"
+}

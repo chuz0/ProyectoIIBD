@@ -1,4 +1,4 @@
-CREATE PROCEDURE ValidarCredenciales
+ALTER PROCEDURE ValidarCredenciales
     @username VARCHAR(64),
     @password VARCHAR(64),
     @PostInIP VARCHAR(64),
@@ -10,9 +10,10 @@ BEGIN
     SET @OutResultCode=0;
     SET NOCOUNT ON;
 
-    IF EXISTS (SELECT 1 FROM usuario WHERE username = @username AND pass = @password)
+    IF EXISTS (SELECT 1 FROM dbo.Usuario WHERE username = @username AND pass = @password)
     BEGIN
         SET @OutResultCode=0;
+        BEGIN TRANSACTION;
         INSERT INTO dbo.bitacoraEvento(
         IdTipoEvento,
         IdUsuario,
@@ -20,18 +21,19 @@ BEGIN
         Descripcion,
         PostInIP,
         PostTime
-    ) VALUES (
+        ) VALUES (
         1,
         (SELECT Id FROM dbo.Usuario WHERE Username = @username),
         GETDATE(),
         'Login Exitoso',
         @PostInIP,
-        @PostTime
-    );
+        @PostTime);
+        COMMIT TRANSACTION;
     END
     ELSE
     BEGIN
         SET @OutResultCode=50002;
+        BEGIN TRANSACTION;
         INSERT INTO dbo.bitacoraEvento(
         IdTipoEvento,
         IdUsuario,
@@ -41,12 +43,14 @@ BEGIN
         PostTime
     ) VALUES (
         2,
-        (SELECT Id FROM dbo.Usuario WHERE Username = @username),
+        1,
         GETDATE(),
         'Login No Exitoso',
         @PostInIP,
         @PostTime
     );
     END
+    COMMIT TRANSACTION;
+    SET NOCOUNT OFF;
 END
 GO
