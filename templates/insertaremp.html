@@ -34,7 +34,7 @@
         input[type="date"],
         input[type="number"],
         select {
-            width: calc(100% - 18px);
+            width: calc(25% - 18px);
             padding: 8px;
             margin-bottom: 10px;
             border-radius: 5px;
@@ -68,8 +68,8 @@
     <h2 id="usuario">Usuario: {{username}}</h2>
     <h2>Insertar Empleado</h2>
     <form id="formulario-empleado" method="post", action="/insertaremp">
-        <label for="idPuesto">Puesto:</label>
-        <select id="idPuesto" name="idPuesto"></select><br><br>
+        <label for="Puesto">Puesto:</label>
+        <select id="Puesto" name="Puesto"></select><br><br>
         
         <label for="valorDocumento">Valor Documento:</label>
         <input type="text" id="valorDocumento" name="valorDocumento"><br><br>
@@ -80,12 +80,6 @@
         <label for="fechaContratacion">Fecha Contratación:</label>
         <input type="date" id="fechaContratacion" name="fechaContratacion"><br><br>
 
-        <label for="saldoVacaciones">Saldo Vacaciones:</label>
-        <input type="number" id="saldoVacaciones" name="saldoVacaciones"><br><br>
-
-        <label for="esActivo">¿Es Activo?</label>
-        <input type="checkbox" id="esActivo" name="esActivo" value="1"><br><br>
-
         <button type="submit">Enviar</button>
     </form>
     <div id="mensaje"></div>
@@ -93,16 +87,16 @@
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
-    const selectPuesto = document.getElementById('idPuesto');
+    const selectPuesto = document.getElementById('Puesto');
     function cargarPuestos() {
-    fetch('/GetPuestos')
+    fetch('/puestos')
         .then(response => response.json())
         .then(data => {
             selectPuesto.innerHTML = '';
-            data.forEach(puesto => {
+            data.Puestos.forEach(puesto => {                
                 const option = document.createElement('option');
-                option.value = puesto.id;
-                option.textContent = puesto.nombre;
+                option.value = puesto.Nombre;
+                option.textContent = puesto.Nombre;
                 selectPuesto.appendChild(option);
             });
         })
@@ -114,20 +108,36 @@
     const username= document.getElementById('usuario').textContent.split(' ')[1];
 
     $(document).ready(function() {
-        $('#formulario-empleado').submit(function(event) {
-            event.preventDefault();
+    $('#formulario-empleado').submit(function(event) {
+        event.preventDefault();
 
-            var formData = $(this).serialize();
-            formData += '&idPostByUser=' + username;
-            console.log(formData);
-
-            $.post('/insertaremp', formData, function(response) {
-                $('#mensaje').text(response.message);
-            }).fail(function(xhr, status, error) {
+        var formData = $(this).serializeArray();
+        
+        var jsonData = {};
+        $.each(formData, function(index, field) {
+            jsonData[field.name] = field.value;
+        });
+        
+        jsonData['username'] = username;  // Agregar el campo username
+        $.ajax({
+            url: '/insertar_empleado',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(jsonData),
+            success: function(response) {
+                if (response.Error) {
+                    $('#mensaje').text('Error: ' + response.Error);
+                } else {
+                    $('#mensaje').text('Empleado insertado correctamente.');
+                }
+            },
+            error: function(xhr, status, error) {
                 $('#mensaje').text('Error: ' + error);
-            });
+            }
         });
     });
+});
+
 </script>
 
     

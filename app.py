@@ -68,16 +68,45 @@ def login():
 def pagina_principal(username):
     return render_template('index.html', username=username)
 
+@app.route('/insertaremp', methods=['GET'])
+def abrir_insertar_empleado():
+    username = request.args.get('username')
+    return render_template('insertaremp.html', username=username)
+
+@app.route('/puestos', methods=['GET'])
+def listar_puestos():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""EXEC	[dbo].[GetPuestos]""")
+
+        puestos = cursor.fetchall()
+        cursor.nextset()
+
+        puestos_lista = []
+
+        for puesto in puestos:
+            puestos_lista.append({
+                'Nombre': puesto[0]
+            })
+
+        return jsonify({'Puestos': puestos_lista})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 # Ruta para ejecutar el procedimiento almacenado
 @app.route('/insertar_empleado', methods=['POST'])
 def insertar_empleado():
-    puesto = request.json.get('puesto')
-    valor_documento_identidad = request.json.get('valor_documento_identidad')
+    puesto = request.json.get('Puesto')
+    valor_documento_identidad = request.json.get('valorDocumento')
     nombre = request.json.get('nombre')
-    fecha_contratacion = request.json.get('fecha_contratacion')
+    fecha_contratacion = request.json.get('fechaContratacion')
     username = request.json.get('username')
-    post_in_ip = request.json.get('post_in_ip')
-    post_time = request.json.get('post_time')
+    post_in_ip = request.remote_addr
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -95,29 +124,32 @@ def insertar_empleado():
                     @FechaContratacion = ?,
                     @Username = ?,
                     @PostInIP = ?,
-                    @PostTime = ?,
 		            @OutResulTCode = @OutResulTCode OUTPUT
 
                 SELECT	@OutResulTCode as N'@OutResultCode'
-                """, (puesto, valor_documento_identidad, nombre, fecha_contratacion, username, post_in_ip, post_time))
+                """, (puesto, valor_documento_identidad, nombre, fecha_contratacion, username, post_in_ip))
 
         # Obtener el valor del código de resultado
         out_result_code = cursor.fetchone()[0]
-
-        # Confirmar la transacción si todo es exitoso
-        conn.commit()
+        print(out_result_code)
+        if out_result_code !=0:
+            cursor.execute("""EXEC	[dbo].[GetError]
+		    @Codigo = ?""", (out_result_code))
+            error = cursor.fetchone()[0]
+            print(error)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code, 'Error': error})
+        else:
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code})
+    
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-    finally:
-        # Cerrar el cursor y la conexión
-        cursor.close()
-        conn.close()
 
-    # Devolver el código de resultado como respuesta
-    return jsonify({'OutResultCode': out_result_code})
-
-
-# Ruta para obtener los empleados
 @app.route('/listar_empleados', methods=['GET'])
 def listar_empleados():
     conn = get_db_connection()

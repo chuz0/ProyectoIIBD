@@ -31,8 +31,7 @@ ORDER BY E.Nombre;
 			GETDATE()
 		);
 
-		SET @OutResulTCode=50005  ;  -- Codigo de error standar del profe para informar de un error capturado en el catch
-
+		SET @OutResulTCode=50008; 
 	END CATCH;
 
 	SET NOCOUNT Off;
