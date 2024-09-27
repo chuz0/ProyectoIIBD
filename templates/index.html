@@ -135,6 +135,9 @@
             justify-content: center;
             align-items: center;
         }
+        .error_div{
+            display: none;
+        }
 
     </style>
 </head>
@@ -142,7 +145,7 @@
     <header class="grid-container">
         <div class="container searchForm">
             <h2>Gestor de Planilla</h2>
-            <form>
+            <form class="filtro">
                 <label for="search">Filtar:</label>
                 <input type="text" id="search" name="search" required, class="input", placeholder="Ingrese un número o un nombre"><br><br>
                 <input type="submit" value="Buscar", class="boton">
@@ -232,6 +235,29 @@
             .catch(error => {
                 console.error('Error:', error);
         });
+
+    const formularioFiltro = document.querySelector('.filtro');
+    formularioFiltro.addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(formularioFiltro);
+        const busqueda = formData.get('search');
+        const username = document.getElementById('bienvenida').textContent.split(' ')[1];
+        const urlBusqueda = `http://127.0.0.1:5000/empleados/filtro?search=${busqueda}&username=${username}`;
+        fetch(urlBusqueda)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener el archivo JSON');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                cargarEmpleados(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
 
         // Función para cargar empleados en la tabla
     function cargarEmpleados(empleados) {

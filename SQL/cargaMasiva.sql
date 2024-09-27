@@ -35,7 +35,7 @@ BEGIN
         FROM @xmlData.nodes('/Datos/Usuarios/usuario') AS T(Usuario);
 
         -- Insertar en la tabla Empleado
-        INSERT INTO dbo.Empleado (IdPuesto, ValorDocumentoIdentidad, Nombre, FechaContratacion)
+        INSERT INTO dbo.Empleado (IdPuesto, ValorDocumentoIdentidad, Nombre, FechaContratacion, SaldoVacaciones)
         SELECT 
             (SELECT Id FROM dbo.Puesto WHERE Nombre = Empleado.value('@Puesto', 'VARCHAR(128)')),
             Empleado.value('@ValorDocumentoIdentidad', 'VARCHAR(128)'),
@@ -50,11 +50,25 @@ BEGIN
             (SELECT Id FROM dbo.TipoMovimiento WHERE Nombre = Movimiento.value('@IdTipoMovimiento', 'VARCHAR(128)')),
             Movimiento.value('@Fecha', 'DATETIME'),
             Movimiento.value('@Monto', 'INT'),
-            Movimiento.value('@Monto', 'INT'),  -- Ajustar el nuevo saldo correctamente según la lógica
+            Movimiento.value('@Monto', 'INT'),  
             (SELECT Id FROM dbo.Usuario WHERE Username = Movimiento.value('@PostByUser', 'VARCHAR(128)')),
             Movimiento.value('@PostInIP', 'VARCHAR(64)'),
             Movimiento.value('@PostTime', 'DATETIME')
         FROM @xmlData.nodes('/Datos/Movimientos/movimiento') AS T(Movimiento);
+
+        -- Actualizar el saldo de vacaciones de acuerdo con los movimientos realizados
+        UPDATE E
+        SET E.SaldoVacaciones = E.SaldoVacaciones +
+            CASE 
+                -- Si el tipo de movimiento es un crédito, se suma el monto
+                WHEN TM.TipoAccion = 'Credito' THEN M.Monto 
+                -- Si el tipo de movimiento es un débito, se resta el monto
+                WHEN TM.TipoAccion = 'Debito' THEN -M.Monto 
+                ELSE 0
+            END
+        FROM dbo.Empleado E
+        INNER JOIN dbo.Movimiento M ON E.Id = M.IdEmpleado
+        INNER JOIN dbo.TipoMovimiento TM ON M.IdTipoMovimiento = TM.Id;
 
         -- Insertar en la tabla Error
         INSERT INTO dbo.Error (Codigo, Descripcion)

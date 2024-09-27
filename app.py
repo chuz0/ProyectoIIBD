@@ -160,6 +160,49 @@ def listar_empleados():
         cursor.close()
         conn.close()
 
+@app.route('/empleados/filtro', methods=['GET'])
+def filtro_doc():
+    bus = request.args.get('search')
+    user = request.args.get('username')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    ip = request.remote_addr
+    time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    empleados_json = []
+    if bus.isdigit():
+        cursor.execute("""
+        EXEC [dbo].[filtroEmpDoc]
+        @valorDocumento = ?,
+        @Username = ?,
+        @PostInIP = ?,
+        @PostTime = ?
+        """, (bus, user, ip, time))  # Coloca los parámetros correctamente
+
+    else:
+        cursor.execute("""
+        EXEC [dbo].[GetFiltroEmpleadosNombre]
+        @nombre = ?,
+        @Username = ?,
+        @PostInIP = ?,
+        @PostTime = ?
+        """, (bus, user, ip, time))
+    empleados = cursor.fetchall()
+    
+    for empleado in empleados:
+        empleado_json = {
+            'Id': empleado[0],
+            'ValorDocumentoIdentidad': empleado[1],
+            'Nombre': empleado[2],
+            'Puesto': empleado[3],
+            'FechaContratacion': empleado[4].strftime('%d-%m-%Y'),
+            'SaldoVacaciones': empleado[5],
+            'EsActivo': empleado[6]
+        }
+        empleados_json.append(empleado_json)
+    conn.commit()
+    cursor.close()
+    return jsonify(empleados_json)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
