@@ -73,6 +73,28 @@ def abrir_insertar_empleado():
     username = request.args.get('username')
     return render_template('insertaremp.html', username=username)
 
+@app.route('/logout')
+def logout():
+    username = request.args.get('username')
+    ip = request.remote_addr
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        DECLARE @return_value int
+
+        EXEC @return_value = [dbo].[logout]
+            @username = ?,
+            @PostInIP = ?
+
+        SELECT 'Return Value' = @return_value
+    """, (username, ip))
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return render_template('login.html')
+
 @app.route('/puestos', methods=['GET'])
 def listar_puestos():
     conn = get_db_connection()
@@ -234,6 +256,38 @@ def filtro_doc():
     conn.commit()
     cursor.close()
     return jsonify(empleados_json)
+
+@app.route('/modificaremp/getEmpleado', methods=['GET'])
+def get_empleado():
+    search = request.args.get('search')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        EXEC [dbo].[getEmpleadoById]
+        @Id = ?
+    """, (search))
+    empleado = cursor.fetchone()
+    empleado_json = {
+        'Id': empleado[0],
+        'ValorDocumentoIdentidad': empleado[1],
+        'Nombre': empleado[2],
+        'Puesto': empleado[3],
+        'FechaContratacion': empleado[4].strftime('%Y-%m-%d'),
+        'SaldoVacaciones': empleado[5],
+        'EsActivo': empleado[6]
+    }
+    conn.commit()
+    cursor.close()
+    return jsonify(empleado_json)
+
+@app.route('/modificaremp', methods=['GET'])
+def abrir_modificar_empleado():
+    username = request.args.get('username')
+    documento = request.args.get('documento')
+    return render_template('modificaremp.html', username=username, documento=documento)
+
+
+
 
 
 if __name__ == '__main__':

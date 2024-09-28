@@ -54,3 +54,30 @@ BEGIN
     SET NOCOUNT OFF;
 END
 GO
+
+CREATE PROCEDURE logout
+    @username VARCHAR(64),
+    @PostInIP VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRANSACTION;
+    INSERT INTO dbo.bitacoraEvento(
+        IdTipoEvento,
+        IdUsuario,
+        Fecha,
+        Descripcion,
+        PostInIP,
+        PostTime
+    ) VALUES (
+        4,
+        (SELECT Id FROM dbo.Usuario WHERE Username = @username),
+        GETDATE(),
+        'Logout',
+        @PostInIP,
+        GETDATE()
+    );
+    COMMIT TRANSACTION;
+    SET NOCOUNT OFF;
+END
+GO

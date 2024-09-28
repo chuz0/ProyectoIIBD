@@ -18,3 +18,6 @@ GET http://localhost:5000//empleados/filtro?search=Camila&username=Erick
 
 ### Obtener puestos
 GET http://localhost:5000/puestos
+
+### get empleado by id
+GET http://localhost:5000//modificaremp/getEmpleado?search=6789012

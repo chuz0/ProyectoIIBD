@@ -157,7 +157,7 @@
             <a class="boton enlace", id="crear">Crear Empleado</a>
         </div>
         <div class="container movimientoForm">
-            <a href="/logout" class="boton enlace">Logout</a>
+            <a class="boton enlace" id="logout">Logout</a>
         </div>
         </header>
     <h2>Lista de Empleados</h2>
@@ -239,6 +239,17 @@
     document.getElementById('crear').addEventListener('click', function() {
         const urlInsertarEmpleado = 'http://127.0.0.1:5000/insertaremp?username=' + document.getElementById('bienvenida').textContent.split(' ')[1];
         window.location.href = urlInsertarEmpleado;
+    });
+
+    document.getElementById('logout').addEventListener('click', function() {
+        const urlLogout = 'http://127.0.0.1:5000/logout?username=' + document.getElementById('bienvenida').textContent.split(' ')[1];
+        window.location.href = urlLogout;
+    });
+
+    document.getElementById('modificar').addEventListener('click', function() {
+        const seleccion = document.getElementById('seleccion');
+        const documento = seleccion.querySelector('td:nth-child(1)').textContent;
+        window.location.href = `/modificaremp?documento=${documento}&username=`+ document.getElementById('bienvenida').textContent.split(' ')[1];
     });
 
     const formularioFiltro = document.querySelector('.filtro');

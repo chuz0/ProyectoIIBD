@@ -75,3 +75,21 @@ BEGIN
     COMMIT TRANSACTION;
 END
 GO
+
+ALTER PROCEDURE getEmpleadoById 
+    @Id INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT E.[Id]  
+       , E.[ValorDocumentoIdentidad]
+       , E.[Nombre]
+       , P.[Nombre] AS Puesto
+       , E.[FechaContratacion]
+       , E.[SaldoVacaciones]
+       , E.[EsActivo] 
+    FROM dbo.Empleado E
+    INNER JOIN dbo.Puesto P ON E.IdPuesto = P.Id
+    WHERE E.ValorDocumentoIdentidad = @Id;
+END
+GO

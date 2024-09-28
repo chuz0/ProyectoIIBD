@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar Empleado</title>
+</head>
+<body>
+    <h2 id="usuario">Usuario: {{username}}</h2>
+    <h2 id="informacion">Modificar Empleado, Documento: {{documento}}</h2>
+    <form id="formulario-empleado" method="post", action="/modificaremp">
+        <label for="Puesto">Puesto:</label>
+        <select id="Puesto" name="Puesto"></select><br><br>
+        
+        <label for="valorDocumento">Valor Documento Identidad: {{documento}}</label><br><br>
+
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre"><br><br>
+
+        <label for="fechaContratacion">Fecha Contratación:</label>
+        <input type="date" id="fechaContratacion" name="fechaContratacion"><br><br>
+
+        <label for="saldoVacaciones" id="saldoVacaciones">Saldo Vacaciones: </label><br><br>
+
+        <label for="esActivo">¿Es Activo?</label>
+        <input type="checkbox" id="esActivo" name="esActivo" value="1"><br><br>
+
+        <button type="submit">Modificar</button>
+    </form>
+    <div id="mensaje"></div>
+    <a href="/pagina_principal/{{username}}", class="boton">Regresar</a>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+
+const selectPuesto = document.getElementById('Puesto');
+    function cargarPuestos() {
+    fetch('/puestos')
+        .then(response => response.json())
+        .then(data => {
+            selectPuesto.innerHTML = '';
+            data.Puestos.forEach(puesto => {                
+                const option = document.createElement('option');
+                option.value = puesto.Nombre;
+                option.textContent = puesto.Nombre;
+                selectPuesto.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error al obtener puestos:', error));
+    }
+
+
+    function obtenerDatos(datos) {
+        document.getElementById('Puesto').value = datos.Puesto;
+        document.getElementById('nombre').value = datos.Nombre;
+        document.getElementById('fechaContratacion').value = datos.FechaContratacion;
+        document.getElementById('saldoVacaciones').textContent = 'Saldo Vacaciones: '+datos.SaldoVacaciones;
+        document.getElementById('esActivo').checked = datos.EsActivo;
+
+    }  
+
+    function busquedaFunc() {
+    const busqueda = document.getElementById('informacion').textContent.split(' ')[3];
+    const urlBusqueda = `http://127.0.0.1:5000//modificaremp/getEmpleado?search=${busqueda}`;
+    return fetch(urlBusqueda)
+        .then(response => response.json())
+        .then(data => {
+            return data;
+        })
+        .catch(error => {
+            console.error('Error al obtener datos:', error);
+            return null;
+        });
+    }   
+    cargarPuestos();
+    busquedaFunc().then(datos => {
+        obtenerDatos(datos);
+    });
+
+
+    const formulario = document.getElementById('formulario-empleado');
+    const username= document.getElementById('usuario').textContent.split(' ')[1];
+    $(document).ready(function() {
+        $('#formulario-empleado').submit(function(event) {
+            event.preventDefault();
+
+            var formData = $(this).serialize();
+            formData += '&idPostByUser=' + username;
+            if (!document.getElementById('esActivo').checked) {
+                formData += '&esActivo=0';;
+            }
+            formData += '&valorDocumento=' + document.getElementById('informacion').textContent.split(' ')[3];
+            formData += '&saldoVacaciones=' + document.getElementById('saldoVacaciones').textContent.split(' ')[2];
+            
+            
+            console.log(formData);
+
+
+            $.post('/modificaremp', formData, function(response) {
+                $('#mensaje').text(response.message);
+            }).fail(function(xhr, status, error) {
+                $('#mensaje').text('Error: ' + error);
+            });
+        });
+    });
+    
+
+</script>
+
+    
+</body>
+</html>
