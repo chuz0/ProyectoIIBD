@@ -21,3 +21,17 @@ GET http://localhost:5000/puestos
 
 ### get empleado by id
 GET http://localhost:5000//modificaremp/getEmpleado?search=6789012
+
+### Modificar empleado
+POST http://localhost:5000/modificaremp
+Content-Type: application/json
+
+{
+  "Puesto": "Cuidador",
+  "valorDocumentoAnterior": "987654",
+  "valorDocumentoNuevo": "987654321",
+  "nombreAnterior": "Andrea Vargas", 
+  "nombreNuevo": "Andrea Vargas", 
+  "saldoVacaiones": 0,
+  "username": "Erick"
+}

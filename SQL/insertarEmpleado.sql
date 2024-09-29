@@ -120,12 +120,13 @@ BEGIN
 END;
 GO
 
-CREATE PROCEDURE [dbo].[GetPuestos]
+ALTER PROCEDURE [dbo].[GetPuestos]
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-    SELECT Nombre FROM dbo.Puesto;
+    SELECT Nombre FROM dbo.Puesto
+    ORDER BY Nombre;
     END TRY
     BEGIN CATCH
         INSERT INTO dbo.DBErrors VALUES (

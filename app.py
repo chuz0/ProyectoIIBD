@@ -286,6 +286,58 @@ def abrir_modificar_empleado():
     documento = request.args.get('documento')
     return render_template('modificaremp.html', username=username, documento=documento)
 
+@app.route('/modificaremp', methods=['POST'])
+def modificar_empleado():
+    puesto = request.json.get('Puesto')
+    valorDocumentoAnterior = request.json.get('valorDocumentoAnterior')
+    valorDocumentoNuevo = request.json.get('valorDocumentoNuevo')
+    nombreAnterior = request.json.get('nombreAnterior')
+    nombreNuevo = request.json.get('nombreNuevo')
+    saldoVacaciones = request.json.get('saldoVacaciones')
+    username = request.json.get('username')
+    post_in_ip = request.remote_addr
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+                DECLARE	@return_value int,
+                    @OutResulTCode int
+
+                EXEC	@return_value = [dbo].[ModificarEmpleadoPorDocumento]
+		            @ValorDocumentoIdentidadAnterior = ?,
+		            @ValorDocumentoIdentidadNuevo = ?,
+		            @NombreAnterior = ?,
+		            @NombreNuevo = ?,
+		            @PuestoNuevo = ?,
+		            @SaldoVacaciones = ?,
+		            @Username = ?,
+		            @PostInIP = ?,
+		            @OutResultCode = @OutResultCode OUTPUT
+
+                SELECT	@OutResulTCode as N'@OutResultCode'
+                """, (valorDocumentoAnterior, valorDocumentoNuevo, nombreAnterior, nombreNuevo, puesto, saldoVacaciones, username, post_in_ip))
+
+        out_result_code = cursor.fetchone()[0]
+
+        if out_result_code !=0:
+            cursor.execute("""EXEC	[dbo].[GetError]
+            @Codigo = ?""", (out_result_code))
+            error = cursor.fetchone()[0]
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code, 'Error': error})
+        else:
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code})
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 

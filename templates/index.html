@@ -170,7 +170,6 @@
                     <th>Puesto</th>
                     <th>Fecha Contratación</th>
                     <th>Saldo Vacaciones</th>
-                    <th>Activo</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -191,7 +190,6 @@
                         <th>Puesto</th>
                         <th>Fecha Contratación</th>
                         <th>Saldo Vacaciones</th>
-                        <th>Activo</th>
                     </tr>
                 </thead>
                 <tbody id="seleccion">
@@ -303,9 +301,6 @@
             saldoVacacionesCelda.textContent = empleado.SaldoVacaciones;
             fila.appendChild(saldoVacacionesCelda);
 
-            const esActivoCelda = document.createElement('td');
-            esActivoCelda.textContent = empleado.EsActivo ? 'Sí' : 'No';;
-            fila.appendChild(esActivoCelda);
             const accionesCelda = document.createElement('td');
             const verBoton = document.createElement('button');
             const divOpciones = document.querySelector('.opcionesDiv');
@@ -335,9 +330,6 @@
                 const saldoSeleccion = document.createElement('td');
                 saldoSeleccion.textContent = empleado.SaldoVacaciones;
                 filaSeleccion.appendChild(saldoSeleccion);
-                const activoSeleccion = document.createElement('td');
-                activoSeleccion.textContent = empleado.EsActivo ? 'Sí' : 'No';
-                filaSeleccion.appendChild(activoSeleccion);
                 seleccion.appendChild(filaSeleccion);
             });
 

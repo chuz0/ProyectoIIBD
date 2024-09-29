@@ -1,4 +1,4 @@
-CREATE PROCEDURE GetFiltroEmpleadosNombre
+ALTER PROCEDURE GetFiltroEmpleadosNombre
     @nombre VARCHAR(64),
     @Username VARCHAR(128),
     @PostInIP VARCHAR(64),
@@ -15,7 +15,7 @@ BEGIN
        , E.[EsActivo] 
     FROM dbo.Empleado E
     INNER JOIN dbo.Puesto P ON E.IdPuesto = P.Id
-    WHERE E.Nombre LIKE '%' + @nombre + '%'
+    WHERE E.Nombre LIKE '%' + @nombre + '%' AND E.EsActivo = 1
     ORDER BY E.Nombre ASC;
     BEGIN TRANSACTION;
     INSERT INTO dbo.bitacoraEvento(
@@ -37,7 +37,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE dbo.filtroEmpDoc
+ALTER PROCEDURE dbo.filtroEmpDoc
     @valorDocumento int,
     @Username VARCHAR(128),
     @PostInIP VARCHAR(64),
@@ -54,7 +54,7 @@ BEGIN
        , E.[EsActivo] 
     FROM dbo.Empleado E
     INNER JOIN dbo.Puesto P ON E.IdPuesto = P.Id
-    WHERE CAST(ValorDocumentoIdentidad AS VARCHAR(20)) LIKE '%' + CAST(@valorDocumento AS VARCHAR(20)) + '%'
+    WHERE CAST(ValorDocumentoIdentidad AS VARCHAR(20)) LIKE '%' + CAST(@valorDocumento AS VARCHAR(20)) + '%' AND E.EsActivo = 1
     ORDER BY nombre ASC;
     BEGIN TRANSACTION;
     INSERT INTO dbo.bitacoraEvento(
