@@ -16,6 +16,7 @@ SELECT E.[Id]
        , E.[EsActivo] 
 FROM dbo.Empleado E
 INNER JOIN dbo.Puesto P ON E.IdPuesto = P.Id
+WHERE E.EsActivo = 1
 ORDER BY E.Nombre;
 
 	END TRY
