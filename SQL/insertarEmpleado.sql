@@ -12,7 +12,7 @@ BEGIN
     BEGIN TRY
         SET @OutResultCode = 0;
         
-        IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE Nombre = @Nombre)
+        IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE Nombre = @Nombre AND EsActivo = 1)
         BEGIN
             SET @OutResultCode = 50005;
 
@@ -34,7 +34,7 @@ BEGIN
         END
         ELSE
         BEGIN
-            IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE ValorDocumentoIdentidad = @ValorDocumentoIdentidad)
+            IF EXISTS (SELECT 1 FROM dbo.Empleado WHERE ValorDocumentoIdentidad = @ValorDocumentoIdentidad AND EsActivo = 1)
             BEGIN
                 SET @OutResultCode = 50004;
 

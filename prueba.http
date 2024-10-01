@@ -35,3 +35,13 @@ Content-Type: application/json
   "saldoVacaiones": 0,
   "username": "Erick"
 }
+
+### Eliminar empleado
+POST http://localhost:5000/eliminaremp
+Content-Type: application/json
+
+{
+  "valorDocumento": "305470812",
+  "username": "Erick",
+  "confirmacion": "1"
+}

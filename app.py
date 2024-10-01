@@ -335,11 +335,57 @@ def modificar_empleado():
             conn.close()
             return jsonify({'OutResultCode': out_result_code})
     
+    finally:
+        cursor.close()
+        conn.close()
+        
+
+@app.route('/eliminaremp', methods=['POST'])
+def eliminar_empleado():
+    documento = request.json.get('valorDocumento')
+    username = request.json.get('username')
+    confrimacion = request.json.get('confirmacion')
+    post_in_ip = request.remote_addr
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+                DECLARE	@return_value int,
+                    @OutResulTCode int
+
+                EXEC	@return_value = [dbo].[IntentoBorrado]
+                    @ValorDocumentoIdentidad = ?,
+                    @Username = ?,
+                    @Confirmacion = ?,
+                    @PostInIP = ?,
+                    @OutResultCode = @OutResultCode OUTPUT
+
+                SELECT	@OutResulTCode as N'@OutResultCode'
+                """, (documento, username, confrimacion, post_in_ip))
+
+        out_result_code = cursor.fetchone()[0]
+
+        if out_result_code !=0:
+            cursor.execute("""EXEC	[dbo].[GetError]
+            @Codigo = ?""", (out_result_code))
+            error = cursor.fetchone()[0]
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code, 'Error': error})
+        else:
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code})
+ 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
-
-
+    
+    finally:
+        print()  
 
 
 if __name__ == '__main__':

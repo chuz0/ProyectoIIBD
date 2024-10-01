@@ -2,12 +2,13 @@ ALTER PROCEDURE [dbo].[IntentoBorrado]
     @ValorDocumentoIdentidad VARCHAR(128),
     @Username VARCHAR(128),
     @PostInIP VARCHAR(64),
-    @Confirmación INT,
+    @Confirmacion INT,
     @OutResultCode INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
+        SET @OutResultCode = 0;
         DECLARE @NombreEmpleado VARCHAR(128);
         DECLARE @PuestoEmpleado VARCHAR(128);
         DECLARE @SaldoVacaciones INT;
@@ -24,7 +25,7 @@ BEGIN
         WHERE E.ValorDocumentoIdentidad = @ValorDocumentoIdentidad;        
 
         BEGIN
-            IF @Confirmación = 0
+            IF @Confirmacion = 0
                 BEGIN
                     INSERT INTO dbo.bitacoraEvento(
                         IdTipoEvento,
@@ -84,6 +85,7 @@ BEGIN
             ERROR_MESSAGE(),
             GETDATE()
         );
+        SET @OutResultCode = 50008;
     END CATCH
     SET NOCOUNT OFF;
 END
