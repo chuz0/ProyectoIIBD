@@ -336,8 +336,7 @@ def modificar_empleado():
             return jsonify({'OutResultCode': out_result_code})
     
     finally:
-        cursor.close()
-        conn.close()
+        print()
         
 
 @app.route('/eliminaremp', methods=['POST'])
@@ -387,6 +386,43 @@ def eliminar_empleado():
     finally:
         print()  
 
+@app.route('/movimientoemp', methods=['GET'])
+def abrir_movimiento_empleado():
+    username = request.args.get('username')
+    documento = request.args.get('documento')
+    return render_template('movimientos.html', username=username, documento=documento)
+
+@app.route('/getMovimientos', methods=['GET'])
+def get_movimientos():
+    documento = request.args.get('documento')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        DECLARE	@OutResultCode int
+
+        EXEC	[dbo].[ListarMovimientoByDocumentoIdentidad]
+		    @ValorDocumentoIdentidad = ?,
+		    @OutResultCode = @OutResultCode OUTPUT
+
+        SELECT	@OutResultCode as N'@OutResultCode'
+    """, (documento))
+    movimientos = cursor.fetchall()
+    movimientos_json = []
+    for movimiento in movimientos:
+        movimiento_json = {
+            'Nombre': movimiento[0],
+            'Tipo': movimiento[1],
+            'Fecha': str(movimiento[2].strftime('%d/%m/%Y')),
+            'Monto': movimiento[3],
+            'NuevoSaldo': movimiento[4],
+            'Username': movimiento[5],
+            'PostInIP': movimiento[6],
+            'PostTime': movimiento[7].strftime('%H:%M:%S')
+        }
+        movimientos_json.append(movimiento_json)
+    conn.commit()
+    cursor.close()
+    return jsonify(movimientos_json)
 
 if __name__ == '__main__':
     app.run(debug=True)

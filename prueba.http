@@ -45,3 +45,6 @@ Content-Type: application/json
   "username": "Erick",
   "confirmacion": "1"
 }
+
+### Get movimientos by id
+GET http://localhost:5000/getMovimientos?documento=8326328

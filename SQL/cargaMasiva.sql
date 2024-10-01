@@ -35,7 +35,7 @@ BEGIN
         FROM @xmlData.nodes('/Datos/Usuarios/usuario') AS T(Usuario);
 
         -- Insertar en la tabla Empleado
-        INSERT INTO dbo.Empleado (IdPuesto, ValorDocumentoIdentidad, Nombre, FechaContratacion, SaldoVacaciones)
+        INSERT INTO dbo.Empleado (IdPuesto, ValorDocumentoIdentidad, Nombre, FechaContratacion)
         SELECT 
             (SELECT Id FROM dbo.Puesto WHERE Nombre = Empleado.value('@Puesto', 'VARCHAR(128)')),
             Empleado.value('@ValorDocumentoIdentidad', 'VARCHAR(128)'),
@@ -43,32 +43,39 @@ BEGIN
             Empleado.value('@FechaContratacion', 'DATE')
         FROM @xmlData.nodes('/Datos/Empleados/empleado') AS T(Empleado);
 
-        -- Insertar en la tabla Movimiento
+        -- Insertar los movimientos en la tabla Movimiento y calcular el saldo en una sola operación
         INSERT INTO dbo.Movimiento (IdEmpleado, IdTipoMovimiento, Fecha, Monto, NuevoSaldo, IdPostByUser, PostInIP, PostTime)
         SELECT 
-            (SELECT Id FROM dbo.Empleado WHERE ValorDocumentoIdentidad = Movimiento.value('@ValorDocId', 'VARCHAR(128)')),
-            (SELECT Id FROM dbo.TipoMovimiento WHERE Nombre = Movimiento.value('@IdTipoMovimiento', 'VARCHAR(128)')),
-            Movimiento.value('@Fecha', 'DATETIME'),
-            Movimiento.value('@Monto', 'INT'),
-            Movimiento.value('@Monto', 'INT'),  
-            (SELECT Id FROM dbo.Usuario WHERE Username = Movimiento.value('@PostByUser', 'VARCHAR(128)')),
-            Movimiento.value('@PostInIP', 'VARCHAR(64)'),
-            Movimiento.value('@PostTime', 'DATETIME')
-        FROM @xmlData.nodes('/Datos/Movimientos/movimiento') AS T(Movimiento);
+            E.Id AS IdEmpleado,
+            TM.Id AS IdTipoMovimiento,
+            M.Movimiento.value('@Fecha', 'DATETIME') AS Fecha,
+            M.Movimiento.value('@Monto', 'INT') AS Monto,
+            -- Calcular el nuevo saldo al insertar
+            (E.SaldoVacaciones + 
+             CASE 
+                 WHEN TM.TipoAccion = 'Credito' THEN M.Movimiento.value('@Monto', 'INT')
+                 WHEN TM.TipoAccion = 'Debito' THEN -M.Movimiento.value('@Monto', 'INT')
+                 ELSE 0
+             END) AS NuevoSaldo,
+            (SELECT Id FROM dbo.Usuario WHERE Username = M.Movimiento.value('@PostByUser', 'VARCHAR(128)')) AS IdPostByUser,
+            M.Movimiento.value('@PostInIP', 'VARCHAR(64)') AS PostInIP,
+            M.Movimiento.value('@PostTime', 'DATETIME') AS PostTime
+        FROM @xmlData.nodes('/Datos/Movimientos/movimiento') AS M(Movimiento)
+        INNER JOIN dbo.Empleado E ON E.ValorDocumentoIdentidad = M.Movimiento.value('@ValorDocId', 'VARCHAR(128)')
+        INNER JOIN dbo.TipoMovimiento TM ON TM.Nombre = M.Movimiento.value('@IdTipoMovimiento', 'VARCHAR(128)');
 
-        -- Actualizar el saldo de vacaciones de acuerdo con los movimientos realizados
+        -- Actualizar los saldos de vacaciones de todos los empleados de una sola vez
         UPDATE E
-        SET E.SaldoVacaciones = E.SaldoVacaciones +
-            CASE 
-                -- Si el tipo de movimiento es un crédito, se suma el monto
-                WHEN TM.TipoAccion = 'Credito' THEN M.Monto 
-                -- Si el tipo de movimiento es un débito, se resta el monto
-                WHEN TM.TipoAccion = 'Debito' THEN -M.Monto 
-                ELSE 0
-            END
-        FROM dbo.Empleado E
-        INNER JOIN dbo.Movimiento M ON E.Id = M.IdEmpleado
-        INNER JOIN dbo.TipoMovimiento TM ON M.IdTipoMovimiento = TM.Id;
+        SET SaldoVacaciones = E.SaldoVacaciones + 
+            (SELECT SUM(CASE 
+                            WHEN TM.TipoAccion = 'Credito' THEN M.Movimiento.value('@Monto', 'INT') 
+                            WHEN TM.TipoAccion = 'Debito' THEN -M.Movimiento.value('@Monto', 'INT') 
+                            ELSE 0
+                        END)
+             FROM @xmlData.nodes('/Datos/Movimientos/movimiento') AS M(Movimiento)
+             INNER JOIN dbo.TipoMovimiento TM ON TM.Nombre = M.Movimiento.value('@IdTipoMovimiento', 'VARCHAR(128)')
+             WHERE E.ValorDocumentoIdentidad = M.Movimiento.value('@ValorDocId', 'VARCHAR(128)'))
+        FROM dbo.Empleado E;
 
         -- Insertar en la tabla Error
         INSERT INTO dbo.Error (Codigo, Descripcion)
