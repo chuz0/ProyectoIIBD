@@ -206,14 +206,8 @@
         <div id="confirmacion">
             <h1>¿Seguro que desea eliminar al empleado?</h1>
             <button class="boton", id="confirmar">Confirmar</button>
-            <button class="boton", id="cancelar" onclick="document.getElementById('confirmacion').style.display = 'none'; window.location.reload()" >Cancelar</button>
+            <button class="boton", id="cancelar">Cancelar</button>
         </div>
-    </div>
-
-    <div class="error_div" id="error_divId">
-        <h2 class="error-cont">Error</h2>
-        <p id="error" class="error-cont"></p>
-        <button class="boton error-cont" onclick="document.querySelector('.error_div').style.display = 'none';">Cerrar</button>
     </div>
 
     <script>
@@ -370,6 +364,36 @@
                 document.querySelector('.opcionesDiv').style.display = 'none';
                 window.alert('Empleado eliminado');
                 window.location.reload();
+            });
+        
+    });
+
+    const btnCancelar = document.getElementById('cancelar');
+    btnCancelar.addEventListener('click', function() {
+        const seleccion = document.getElementById('seleccion');
+        const documento = seleccion.querySelector('td:nth-child(1)').textContent;
+        const username = document.getElementById('bienvenida').textContent.split(' ')[1];
+        const urlEliminar = `http://localhost:5000/eliminaremp`;
+        const data = {
+            valorDocumento: documento,
+            username: username,
+            confirmacion: 0
+        };
+        fetch(urlEliminar, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al obtener el archivo JSON');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('confirmacion').style.display = 'none';
             });
         
     });
