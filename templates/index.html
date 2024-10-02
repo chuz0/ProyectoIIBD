@@ -405,6 +405,12 @@
         window.location.href = `/movimientoemp?documento=${documento}&username=${username}`;
     });
     
+    document.getElementById('insMovimiento').addEventListener('click', function() {
+        const seleccion = document.getElementById('seleccion');
+        const documento = seleccion.querySelector('td:nth-child(1)').textContent;
+        const username = document.getElementById('bienvenida').textContent.split(' ')[1];
+        window.location.href = `/insertmovimiento?documento=${documento}&username=${username}`;
+    });
 
     </script>
 </body>

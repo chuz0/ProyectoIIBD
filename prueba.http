@@ -48,3 +48,17 @@ Content-Type: application/json
 
 ### Get movimientos by id
 GET http://localhost:5000/getMovimientos?documento=8326328
+
+### Insertar movimiento
+POST http://localhost:5000/insertarMovimiento
+Content-Type: application/json
+
+{
+  "documento": "899194",
+  "tipo": "Disfrute de vacaciones",
+  "monto": "10",
+  "username": "UsuarioScripts"
+}
+
+### Obtener tipoMovs
+GET http://localhost:5000/tipoMovs

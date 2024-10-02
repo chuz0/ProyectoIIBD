@@ -168,3 +168,26 @@ BEGIN
     SET NOCOUNT Off;
 END;
 GO
+
+CREATE PROCEDURE [dbo].[GetTiposMovimiento]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    BEGIN TRY
+    SELECT Nombre FROM dbo.TipoMovimiento
+    ORDER BY Nombre;
+    END TRY
+    BEGIN CATCH
+        INSERT INTO dbo.DBErrors VALUES (
+            SUSER_SNAME(),
+            ERROR_NUMBER(),
+            ERROR_STATE(),
+            ERROR_SEVERITY(),
+            ERROR_LINE(),
+            ERROR_PROCEDURE(),
+            ERROR_MESSAGE(),
+            GETDATE()
+        );
+    END CATCH;
+    SET NOCOUNT Off;
+END;

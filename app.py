@@ -424,5 +424,82 @@ def get_movimientos():
     cursor.close()
     return jsonify(movimientos_json)
 
+@app.route('/insertmovimiento', methods=['GET'])
+def abrir_insertar_movimiento_empleado():
+    username = request.args.get('username')
+    documento = request.args.get('documento')
+    return render_template('insertarMovimiento.html', username=username, documento=documento)
+
+@app.route('/insertarMovimiento', methods=['POST'])
+def insertar_movimiento():
+    documento = request.json.get('documento')
+    tipo = request.json.get('tipo')
+    monto = request.json.get('monto')
+    username = request.json.get('username')
+    post_in_ip = request.remote_addr
+
+    print(documento,tipo,monto,username)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+                DECLARE	@OutResulTCode int
+
+                EXEC   [dbo].[InsertarMovimiento]
+                    @ValorDocumentoIdentidad = ?,
+                    @TipoMovimiento = ?,
+                    @Monto = ?,
+                    @Username = ?,
+                    @PostInIP = ?,
+                    @OutResultCode = @OutResultCode OUTPUT
+
+                SELECT	@OutResulTCode as N'@OutResultCode'
+                """, (documento, tipo, monto, username, post_in_ip))
+
+        out_result_code = cursor.fetchone()[0]
+
+        if out_result_code !=0:
+            cursor.execute("""EXEC	[dbo].[GetError]
+            @Codigo = ?""", (out_result_code))
+            error = cursor.fetchone()[0]
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code, 'Error': error})
+        else:
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return jsonify({'OutResultCode': out_result_code})
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/tipoMovs', methods=['GET'])
+def listar_movimientos():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""EXEC	[dbo].[GetTiposMovimiento]""")
+
+        tms = cursor.fetchall()
+        cursor.nextset()
+
+        tipos = []
+
+        for tm in tms:
+            tipos.append({
+                'nombre': tm[0]
+            })
+
+        return jsonify({'TipoMovimientos': tipos})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 if __name__ == '__main__':
     app.run(debug=True)
