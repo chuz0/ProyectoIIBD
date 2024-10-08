@@ -104,6 +104,10 @@
     }
 
     window.addEventListener('load', cargarPuestos);
+    const fecha = document.getElementById('fechaContratacion');
+    const hoy = new Date().toISOString().split('T')[0];
+    fecha.value = hoy;
+    fecha.readOnly = true;
 
     const username= document.getElementById('usuario').textContent.split(' ')[1];
 
@@ -126,9 +130,10 @@
             data: JSON.stringify(jsonData),
             success: function(response) {
                 if (response.Error) {
-                    $('#mensaje').text('Error: ' + response.Error);
+                    window.alert('Error: ' + response.Error);
                 } else {
-                    $('#mensaje').text('Empleado insertado correctamente.');
+                    window.alert('Empleado insertado correctamente');
+                    window.location.href = '/pagina_principal/' + username;
                 }
             },
             error: function(xhr, status, error) {

@@ -27,7 +27,10 @@ BEGIN
                 5,
                 (SELECT Id FROM dbo.Usuario WHERE Username = @Username),
                 GETDATE(),
-                'Error: Nombre duplicado en la inserción del empleado',
+                CONCAT('Error: ', (SELECT Descripcion FROM dbo.Error WHERE Codigo = @OutResultCode), 
+                ' Nombre: ', @Nombre,
+                ' Documento de identidad: ', @ValorDocumentoIdentidad,
+                ' Puesto: ', @Puesto),
                 @PostInIP,
                 GETDATE()
             );
@@ -49,7 +52,10 @@ BEGIN
                     5,
                     (SELECT Id FROM dbo.Usuario WHERE Username = @Username),
                     GETDATE(),
-                    'Error: Documento de identidad duplicado en la inserción del empleado',
+                    CONCAT('Error: ', (SELECT Descripcion FROM dbo.Error WHERE Codigo = @OutResultCode),
+                    ' Nombre: ', @Nombre,
+                    ' Documento de identidad: ', @ValorDocumentoIdentidad,
+                    ' Puesto: ', @Puesto),
                     @PostInIP,
                     GETDATE()
                 );
@@ -81,7 +87,9 @@ BEGIN
                         6,
                         (SELECT Id FROM dbo.Usuario WHERE Username = @Username),
                         GETDATE(),
-                        'Inserción exitosa del empleado',
+                        CONCAT('Empleado insertado, Nombre: ', @Nombre,
+                        ' Documento de identidad: ', @ValorDocumentoIdentidad,
+                        ' Puesto: ', @Puesto),
                         @PostInIP,
                         GETDATE()
                     );

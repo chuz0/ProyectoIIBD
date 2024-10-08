@@ -4,6 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modificar Empleado</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"],
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: calc(25% - 18px);
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        input[type="checkbox"] {
+            margin-top: 5px;
+        }
+        button[type="submit"],
+        .boton {
+            width: calc(100% - 40px);
+            display: block;
+            margin: 20px auto 0 auto;
+            text-align: center;
+            text-decoration: none;
+            background-color: #00ff80;
+            color: white;
+            padding: 10px 0;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        #mensaje {
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <h2 id="usuario">Usuario: {{username}}</h2>
@@ -105,9 +163,10 @@ const selectPuesto = document.getElementById('Puesto');
                 data: JSON.stringify(jsonData),
                 success: function(response) {
                     if (response.Error) {
-                        $('#mensaje').text('Error: ' + response.Error);
+                        window.alert('Error: ' + response.Error);
                     } else {
-                        $('#mensaje').text('Empleado Modificado correctamente.');
+                        window.alert('Empleado modificado correctamente');
+                        window.location.href = '/pagina_principal/' + username;
                     }},
                 error: function(xhr, status, error) {
                     $('#mensaje').text('Error: ' + error);

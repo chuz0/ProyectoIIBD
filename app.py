@@ -5,7 +5,6 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-1
 # Configuración de la conexión a la base de datos
 def get_db_connection():
     connection = pyodbc.connect(
@@ -32,7 +31,6 @@ def login():
 
     ip = request.remote_addr
     time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(time)
 
     try:
         cursor.execute("""
@@ -50,6 +48,8 @@ def login():
                 """, (username, password, ip, time))
 
         out_result_code = cursor.fetchone()[0]
+        print(out_result_code)
+
 
         conn.commit()
 

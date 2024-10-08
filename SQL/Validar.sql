@@ -33,7 +33,6 @@ BEGIN
     ELSE
     BEGIN
         SET @OutResultCode=50002;
-        BEGIN TRANSACTION;
         INSERT INTO dbo.bitacoraEvento(
         IdTipoEvento,
         IdUsuario,
@@ -45,12 +44,11 @@ BEGIN
         2,
         1,
         GETDATE(),
-        'Login No Exitoso',
+        CONCAT('Login Fallido: ', @OutResultCode),
         @PostInIP,
         @PostTime
     );
     END
-    COMMIT TRANSACTION;
     SET NOCOUNT OFF;
 END
 GO
